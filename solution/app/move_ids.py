@@ -39,12 +39,19 @@ def upgrade(conn: sqlite3.Connection) -> None:
     conn.execute(CREATE_CATEGORY_NEW)  # Already finished: step 1 starts with two empty new tables.
     conn.execute(CREATE_PRODUCT_NEW)
     new_ids = {}  # Already finished: your notebook. It remembers: old category id -> new category id.
-    # TODO 1 (Task 1): bring the new in. Fill the two new tables.
-    #   - for each row of `category` (its id and its name): make a new id with make_id(), write "old id -> new id" in `new_ids`,
-    #     and insert (the new id, the name) into `category_new`.
-    #   - for each row of `product` (its title and its category_id): insert (a new id, the title, the NEW id of its category) into `product_new`.
-    #     A product with no category (category_id is None) must stay with no category.
-    # TODO 2 (Task 2): throw the old away, and let the new take the old names.
-    #   - drop the table `product` first, and then the table `category` (a product points to a category, so the child goes first).
-    #   - rename `category_new` to `category`, and `product_new` to `product`.
+    # Task 1: bring the new in. The categories come first, because a product needs the NEW id of its category.
+    for old_id, name in conn.execute("SELECT id, name FROM category").fetchall():
+        new_ids[old_id] = make_id()  # the notebook: old id -> new id
+        conn.execute("INSERT INTO category_new (id, name) VALUES (?, ?)", (new_ids[old_id], name))
+    for title, category_id in conn.execute("SELECT title, category_id FROM product").fetchall():
+        # new_ids.get(None) gives None, so a product with no category stays with no category.
+        conn.execute(
+            "INSERT INTO product_new (id, title, category_id) VALUES (?, ?, ?)",
+            (make_id(), title, new_ids.get(category_id)),
+        )
+    # Task 2: throw the old away (the product points to the category, so the child goes first), and let the new take the old names.
+    conn.execute("DROP TABLE product")
+    conn.execute("DROP TABLE category")
+    conn.execute("ALTER TABLE category_new RENAME TO category")
+    conn.execute("ALTER TABLE product_new RENAME TO product")
     conn.commit()  # Already finished.

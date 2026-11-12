@@ -1,4 +1,4 @@
-> **Where the files are:** the starter files are in the `base/` folder. Every path below (such as `app/move_ids.py` and `try_it.py`) is inside `base/`. Open a terminal in `base/` to run the commands.
+> **Where the files are:** this branch holds the finished solution in the `solution/` folder: the finished code, and the tests in `solution/tests/`. Every path below (such as `app/move_ids.py` and `try_it.py`) is inside `solution/`. Open a terminal in `solution/` to run the commands. To run the tests, type `python -m unittest -v` (or `pytest`) there. The starter files with the TODO notes are on the `main` branch, in `base/`.
 
 # Move the Ids at ShopNest
 
